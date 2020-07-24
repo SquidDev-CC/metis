@@ -1,4 +1,4 @@
-#! /usr/bin/env lua
+#!/usr/bin/env lua
 
 local function find_latest(dir)
   local launcher = io.open(dir .. "/launcher.properties", "r")
@@ -9,6 +9,7 @@ local function find_latest(dir)
     local k, v = line:match("^([^=]+)=(.*)$")
     if k then info[k] = v end
   end
+  launcher:close()
 
   if not info.version or not info.build then return nil, "Cannot find CCEmuX version" end
   return ("%s/versions/%s/CCEmuX-%s.jar"):format(dir, info.version, info.build)
