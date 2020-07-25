@@ -1,4 +1,5 @@
 # Build directories
 /bin/illuaminate*
-/doc
+/doc/**/*.html
 /.cache
+/loader.lua

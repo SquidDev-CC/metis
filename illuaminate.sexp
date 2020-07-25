@@ -1,14 +1,14 @@
 ; -*- mode: Lisp;-*-
 
-(sources
-  /src/)
-
+(sources /src/)
 
 (doc
-  (title "metis")
-  ; (source-link https://github.com/SquidDev-CC/metis/blob/${commit}/${path}#L${line})
+  (library-path /src/)
 
-  (library-path /src/))
+  (title "metis")
+  (source-link https://github.com/SquidDev-CC/metis/blob/${commit}/${path}#L${line})
+  (index /doc/index.md)
+  (json-index false))
 
 (at /
   (linters syntax:string-index)

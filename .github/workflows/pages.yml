@@ -1,0 +1,36 @@
+name: GitHub Pages
+
+on:
+  push:
+    branches:
+    - dev
+
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - uses: leafo/gh-actions-lua@v6
+
+    # I'm so sorry for the following perl command.
+    - name: Generate index.md
+      run: |
+        bin/mk-loader.lua loader.lua
+        perl -i -pe "s/%LOADER%/$(sed -e 's/[\/&]/\\&/g' loader.lua)/g" doc/index.md
+
+    - name: Generate documentation
+      run: |
+        test -d bin || mkdir bin
+        test -f bin/illuaminate || wget -q -Obin/illuaminate https://squiddev.cc/illuaminate/linux-x86-64/illuaminate
+        chmod +x bin/illuaminate
+        bin/illuaminate doc-gen
+
+    - name: Deploy
+      uses: peaceiris/actions-gh-pages@v3
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        publish_dir: ./doc
+        force_orphan: true
+        commit_message: Build for
