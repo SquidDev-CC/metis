@@ -2,7 +2,7 @@
 --
 -- @tparam function(tbl:table, var:string, value:string) stub The active stub function.
 -- @tparam function fn The function to run.
--- @tparam ... Arguments to this function.
+-- @param ... Arguments to this function.
 -- @treturn { result = table, output = string, error = string, combined = string }
 -- The various output streams and the function's return values.
 local function capture(stub, fn, ...)

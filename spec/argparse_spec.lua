@@ -5,7 +5,7 @@ describe("metis.argparse", function()
 
   it("displays usage", function()
     local spec = argparse.create()
-    spec:add({ "--test", "-t" }, { doc = "Does something"})
+    spec:add({ "--test", "-t" }, { doc = "Does something" })
     spec:add("another")
 
     local result = capture(stub, pcall, spec.parse, spec, "--help")
@@ -13,7 +13,7 @@ describe("metis.argparse", function()
       "USAGE\n",
       " --test,-t    Does something\n",
       " ANOTHER      \n",
-      " -h,--help,-? Show this help message\n"
+      " -h,--help,-? Show this help message\n",
     }))
   end)
 end)

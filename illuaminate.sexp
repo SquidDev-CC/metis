@@ -1,6 +1,8 @@
 ; -*- mode: Lisp;-*-
 
-(sources /src/)
+(sources
+  /src/
+  /spec/)
 
 (doc
   (library-path /src/)
@@ -20,3 +22,8 @@
       (parens no-space)
       (table space)
       (index no-space))))
+
+(at /spec/
+  (lint
+    (globals
+      :max describe expect it pending stub fail sleep)))
