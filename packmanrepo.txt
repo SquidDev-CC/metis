@@ -1,0 +1,32 @@
+name = argparse
+	type = raw
+		url = https://raw.githubusercontent.com/SquidDev-CC/metis/dev/src/metis/argparse.lua
+		filename = argparse.lua
+	target = /usr/modules/metrics
+	category = lib
+	dependencies = none
+	version = 1.0
+	size = 5779
+end
+
+name = timerlib
+	type = raw
+		url = https://raw.githubusercontent.com/SquidDev-CC/metis/dev/src/metis/timer.lua
+		filename = timer.lua
+	target = /usr/modules/metrics
+	category = lib
+	dependencies = none
+	version = 1.0
+	size = 1466
+end
+
+name = sha1-lib
+	type = raw
+		url = https://raw.githubusercontent.com/SquidDev-CC/metis/dev/src/metis/crypto/sha1.lua
+		filename = sha1.lua
+	target = /usr/modules/metrics
+	category = lib
+	dependencies = none
+	version = 1.0
+	size = 5243
+end
