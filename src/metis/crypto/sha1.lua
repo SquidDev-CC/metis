@@ -67,9 +67,9 @@ of a value.
 
 @usage Hash the string "Hello, world!"
 
-  local sha1 = require "metis.crypto.sha1"
-  print(sha1("Hello, world!"))
-  -- 943a702d06f34599aee1f8da8ef9f7296031d699
+    local sha1 = require "metis.crypto.sha1"
+    print(sha1("Hello, world!"))
+    -- 943a702d06f34599aee1f8da8ef9f7296031d699
 ]]
 local function sha1(msg)
   expect(1, msg, "string")
