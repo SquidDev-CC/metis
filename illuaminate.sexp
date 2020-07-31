@@ -23,7 +23,12 @@
       (table space)
       (index no-space))))
 
+(at /src/
+  (lint
+    (globals
+      :max term colours keys)))
+
 (at /spec/
   (lint
     (globals
-      :max describe expect it pending stub fail sleep)))
+      :max describe expect it pending stub fail sleep keys)))

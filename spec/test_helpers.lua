@@ -41,6 +41,14 @@ local function capture(stub, fn, ...)
   }
 end
 
+local function empty_stub(stub)
+  local x = {}
+  local stub = stub(x, "x")
+  stub.value = x.x
+  return stub, x.x
+end
+
 return {
   capture = capture,
+  empty_stub = empty_stub,
 }
