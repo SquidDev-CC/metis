@@ -33,6 +33,7 @@ with_command("git ls-files", function(handle)
   end
 end)
 
+local packages = {}
 for module, file in pairs(modules) do
   local contents = string.dump(loadfile(file))
 
@@ -49,6 +50,8 @@ for module, file in pairs(modules) do
     end
   end
 
+  table.insert(packages, "metis/" .. to_package(module))
+
   io.write("name = ", to_package(module), "\n")
   io.write("\ttype = raw\n")
   io.write("\t\turl = https://raw.githubusercontent.com/SquidDev-CC/metis/dev/", file, "\n")
@@ -60,3 +63,11 @@ for module, file in pairs(modules) do
   io.write("\tsize = ", #contents, "\n")
   io.write("end\n\n")
 end
+
+io.write("name = metis-full\n")
+io.write("\ttype = meta\n")
+io.write("\tcategory = lib\n")
+io.write("\tversion = ", version, "\n")
+io.write("\tdependencies = ", table.concat(packages, " "), "\n")
+io.write("\tsize = 0\n")
+io.write("end\n\n")
