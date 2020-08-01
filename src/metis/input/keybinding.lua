@@ -1,11 +1,11 @@
---[[- @{metis.input.keybinding} provides a mechanism for handling keyboard
-shortcuts. One provides a table of keybindings and their corresponding action,
-and then passes events to it.
+--[[- A system for handling keyboard shortcuts. Given a table of keybindings and
+their corresponding action, @{metis.input.keybinding} will process events and
+invoke the appropriate action when a key is pressed.
 
 ## Keybinding syntax
 Keybindings are written in an Emacs-esque notation, specifying the modifier keys
-and then the actual key. For instance, `C-M-underscore` means the "Control",
-"Meta" (or "Alt") and "underscore" keys must be pressed.
+and then the actual key. For instance, <kbd>C-M-underscore</kbd> means the
+  "Control", "Meta" (or "Alt") and "underscore" keys must be pressed.
 
 @usage
 
@@ -115,7 +115,7 @@ end
 --
 -- Repeat key events will be passed to @{Keybindings:key} by default. If this is
 -- not desired, your keybindings should either check if this event is a repeat
--- (the first argument will be {@true}) or roll your own version of `event`.
+-- (the first argument will be @{true}) or roll your own version of `event`.
 --
 -- @tparam string event The name of the event.
 -- @param ... Additional event arguments.

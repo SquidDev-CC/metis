@@ -33,6 +33,12 @@ code {
     background-color: #f9f2f4;
 }
 
+kbd {
+  border: solid 1px #ccc;
+  background: #fafafa;
+  padding: 3px 5px;
+}
+
 p {
     margin: 0.9em 0;
 }

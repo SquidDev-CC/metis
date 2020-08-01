@@ -21,7 +21,9 @@
       (function-args no-space)
       (parens no-space)
       (table space)
-      (index no-space))))
+      (index no-space))
+
+    (dynamic-modules metis.math)))
 
 (at /src/
   (lint
