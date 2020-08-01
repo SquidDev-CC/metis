@@ -1,5 +1,6 @@
 describe("metis.math", function()
   local math = require "metis.math"
+
   it("clamp", function()
     local out = {}
     for i = 1, 10 do out[i] = math.clamp(i, 3, 7) end

@@ -48,7 +48,24 @@ local function empty_stub(stub)
   return stub, x.x
 end
 
+local function testing(env, name, fun, build)
+  local pp = require "cc.pretty"
+  local function dump(x) return tostring(pp.pretty(x)) end
+
+  env.describe(name, function()
+    return build(function(exp, ...)
+      local args, str_args = table.pack(...), table.pack(...)
+      for i = 1, str_args.n do str_args[i] = dump(str_args[i]) end
+
+      env.it(("%s(%s) == %s"):format(name, table.concat(str_args, ", "), dump(exp)), function()
+        env.expect(fun(table.unpack(args, 1, args.n))):same(exp)
+      end)
+    end)
+  end)
+end
+
 return {
   capture = capture,
   empty_stub = empty_stub,
+  testing = testing,
 }
