@@ -1,6 +1,7 @@
 # Build outputs
 /bin/illuaminate*
 /doc/**/*.html
+/doc/packlist
 /loader.lua
 /.cache
 
@@ -8,3 +9,5 @@
 /scratch
 /.vscode
 /.luacheckrc
+/usr
+/etc
