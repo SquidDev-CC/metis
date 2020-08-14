@@ -43,13 +43,13 @@ local function requestAuth(headers, interactive)
         return true
     elseif interactive then
         pp.print(
-            pp.text("You need to add a Personal Access Token (PAK) to upload Gists. Follow the instructions at ", covertColor(colors.yellow)) ..
-            pp.text("https://tinyurl.com/GitHubPAK", covertColor(colors.blue)) ..
-            pp.text(" to generate one. Make sure to check the '", covertColor(colors.yellow)) ..
-            pp.text("gist", covertColor(colors.blue)) ..
-            pp.text("' checkbox on step 7 (under 'Select scopes'). Once done, paste it here.", covertColor(colors.yellow))
+            pp.text("You need to add a Personal Access Token (PAK) to upload Gists. Follow the instructions at ", convertColor(colors.yellow)) ..
+            pp.text("https://tinyurl.com/GitHubPAK", convertColor(colors.blue)) ..
+            pp.text(" to generate one. Make sure to check the '", convertColor(colors.yellow)) ..
+            pp.text("gist", convertColor(colors.blue)) ..
+            pp.text("' checkbox on step 7 (under 'Select scopes'). Once done, paste it here.", convertColor(colors.yellow))
         )
-        term.setTextColor(covertColor(colors.lime))
+        term.setTextColor(convertColor(colors.lime))
         write("PAK: ")
         term.setTextColor(colors.white)
         local pak = read()
