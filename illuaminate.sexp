@@ -33,4 +33,4 @@
 (at /spec/
   (lint
     (globals
-      :max describe expect it pending stub fail sleep keys)))
+      :max describe expect it pending stub fail sleep keys fs textutils)))
