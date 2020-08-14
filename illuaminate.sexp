@@ -28,7 +28,7 @@
 (at /src/
   (lint
     (globals
-      :max term colours keys)))
+      :max term colours keys colors http textutils fs settings read write print)))
 
 (at /spec/
   (lint
