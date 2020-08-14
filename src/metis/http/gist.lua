@@ -3,11 +3,12 @@
 --
 -- @module cc.http.gist
 
-local expect = require and require("cc.expect").expect or dofile("/rom/modules/main/cc/expect.lua").expect
+local expect = require("cc.expect").expect
+local pp = require("cc.pretty")
 
 if not http then
     if _G.config ~= nil then error("Gist requires http API\nSet http_enable to true in the CraftOS-PC configuration")
-    else error("Gist requires http API\nSet http_enable to true in ComputerCraft's configuration") end
+    else error("Gist requires http API\nEnable HTTP in ComputerCraft's configuration") end
 end
 
 local gist = {}
@@ -30,26 +31,27 @@ local function getGistFile(data)
     end
 end
 
-local function setTextColor(c) if term.isColor() then term.setTextColor(c) elseif c == colors.white or c == colors.yellow then term.setTextColor(colors.white) else term.setTextColor(colors.lightGray) end end
+local function convertColor(c)
+  if term.isColor() then return c
+  elseif c == colors.white or c == colors.yellow then return colors.white
+  else return colors.lightGray end
+end
 
 local function requestAuth(headers, interactive)
     if settings.get("gist.id") ~= nil then
         headers.Authorization = "token " .. settings.get("gist.id")
         return true
     elseif interactive then
-        setTextColor(colors.yellow)
-        write("You need to add a Personal Access Token (PAK) to upload Gists. Follow the instructions at ")
-        setTextColor(colors.blue)
-        write("https://tinyurl.com/GitHubPAK")
-        setTextColor(colors.yellow)
-        write(" to generate one. Make sure to check the '")
-        setTextColor(colors.blue)
-        write("gist")
-        setTextColor(colors.yellow)
-        print("' checkbox on step 7 (under 'Select scopes'). Once done, paste it here.")
-        setTextColor(colors.lime)
+        pp.print(
+            pp.text("You need to add a Personal Access Token (PAK) to upload Gists. Follow the instructions at ", covertColor(colors.yellow)) ..
+            pp.text("https://tinyurl.com/GitHubPAK", covertColor(colors.blue)) ..
+            pp.text(" to generate one. Make sure to check the '", covertColor(colors.yellow)) ..
+            pp.text("gist", covertColor(colors.blue)) ..
+            pp.text("' checkbox on step 7 (under 'Select scopes'). Once done, paste it here.", covertColor(colors.yellow))
+        )
+        term.setTextColor(covertColor(colors.lime))
         write("PAK: ")
-        setTextColor(colors.white)
+        term.setTextColor(colors.white)
         local pak = read()
         if pak == nil or pak == "" then error("Invalid PAK, please try again.") end
         settings.set("gist.id", pak)
@@ -69,6 +71,7 @@ end
 -- * Otherwise, if there's more than one file but only one *.lua file, retrieves the Lua file
 -- * Otherwise, retrieves the first Lua file alphabetically (with a warning)
 -- * Otherwise, fails
+-- If an ID is followed by a colon and a hex string, the info is downloaded from that revision ID
 
 --- Retrieves one file from a Gist using the specified ID.
 -- @tparam string id The Gist ID to download from. See above comments for more details.
@@ -80,40 +83,22 @@ function gist.get(id, progress)
     expect(2, progress, "function", "nil")
     progress = progress or emptyfn
     local file
-    if id:find("/") ~= nil then id, file = id:match("^([0-9A-Fa-f:]+)/(.+)$") end
-    if id == nil or not id:match("^[0-9A-Fa-f][0-9A-Fa-f:]+[0-9A-Fa-f]$") then error("bad argument #1 to 'get' (invalid ID)", 2) end
-    if id:find(":") ~= nil then id = id:gsub(":", "/") end
-    progress("Connecting to api.github.com... ")
-    local handle = http.get("https://api.github.com/gists/" .. id)
-    if handle == nil then
-        progress("Failed.\n")
-        return nil, "Failed to connect"
-    end
-    local meta = textutils.unserializeJSON(handle.readAll())
-    local code = handle.getResponseCode()
-    handle.close()
-    if code ~= 200 then
-        progress("Failed.\n")
-        return nil, "Invalid response code (" .. code .. ")" .. (meta and ": " .. meta.message or "")
-    end
-    if meta == nil or meta.files == nil then
-        progress("Failed.\n")
-        return nil, meta and "GitHub API error: " .. meta.message or "Error parsing JSON"
-    end
-    progress("Success.\n")
-    if file then return getGistFile(meta.files[file]), file
-    elseif next(meta.files, next(meta.files)) == nil then return getGistFile(meta.files[next(meta.files)]), next(meta.files)
-    elseif meta.files["init.lua"] ~= nil then return getGistFile(meta.files["init.lua"]), "init.lua"
+    if id:find("/") ~= nil then id, file = id:match("^([%x:]+)/(.+)$") end
+    if id == nil or not id:match("^%x[%x:]+%x$") then error("bad argument #1 to 'get' (invalid ID)", 2) end
+    local files = gist.getAll(id, progress) -- This could have some overhead if there are many large (2MB+) files in the gist
+    if file then return files[file], file
+    elseif next(files, next(files)) == nil then return files[next(files)], next(files)
+    elseif files["init.lua"] ~= nil then return files["init.lua"], "init.lua"
     else
         local luaFiles = {}
-        for k in pairs(meta.files) do if k:match("%.lua$") then table.insert(luaFiles, k) end end
+        for k in pairs(files) do if k:match("%.lua$") then table.insert(luaFiles, k) end end
         table.sort(luaFiles)
         if #luaFiles == 0 then
             progress("Error: Could not find any Lua files to download!\n")
             return nil, "Could not find any Lua files to download"
         end
         if #luaFiles > 1 then progress("Warning: More than one Lua file detected, downloading the first one alphabetically.\n") end
-        return getGistFile(meta.files[luaFiles[1]]), luaFiles[1]
+        return files[luaFiles[1]], luaFiles[1]
     end
 end
 
@@ -148,8 +133,8 @@ function gist.getAll(id, progress)
     expect(1, id, "string")
     expect(2, progress, "function", "nil")
     progress = progress or emptyfn
-    if id:find("/") ~= nil then id = id:match("^([0-9A-Fa-f:]+)/.*$") end
-    if id == nil or not id:match("^[0-9A-Fa-f][0-9A-Fa-f:]+[0-9A-Fa-f]$") then error("bad argument #1 to 'getAll' (invalid ID)", 2) end
+    if id:find("/") ~= nil then id = id:match("^([%x:]+)/.*$") end
+    if id == nil or not id:match("^%x[%x:]+%x$") then error("bad argument #1 to 'getAll' (invalid ID)", 2) end
     if id:find(":") ~= nil then id = id:gsub(":", "/") end
     progress("Connecting to api.github.com... ")
     local handle = http.get("https://api.github.com/gists/" .. id)
@@ -185,8 +170,8 @@ function gist.info(id, progress)
     expect(1, id, "string")
     expect(2, progress, "function", "nil")
     progress = progress or emptyfn
-    if id:find("/") ~= nil then id = id:match("^([0-9A-Fa-f:]+)/.*$") end
-    if id == nil or not id:match("^[0-9A-Fa-f][0-9A-Fa-f:]+[0-9A-Fa-f]$") then error("bad argument #1 to 'info' (invalid ID)", 2) end
+    if id:find("/") ~= nil then id = id:match("^([%x:]+)/.*$") end
+    if id == nil or not id:match("^%x[%x:]+%x$") then error("bad argument #1 to 'info' (invalid ID)", 2) end
     if id:find(":") ~= nil then id = id:gsub(":", "/") end
     progress("Connecting to api.github.com... ")
     local handle = http.get("https://api.github.com/gists/" .. id)
@@ -230,8 +215,8 @@ function gist.put(files, description, id, interactive)
     expect(2, description, "string", id == nil and "nil" or nil)
     expect(4, interactive, "boolean", "nil")
     if id then
-        if id:find("/") ~= nil then id = id:match("^([0-9A-Fa-f:]+)/.*$") end
-        if id == nil or not id:match("^[0-9A-Fa-f][0-9A-Fa-f:]+[0-9A-Fa-f]$") then error("bad argument #3 to 'put' (invalid ID)", 2) end
+        if id:find("/") ~= nil then id = id:match("^([%x:]+)/.*$") end
+        if id == nil or not id:match("^%x[%x:]+%x$") then error("bad argument #3 to 'put' (invalid ID)", 2) end
         if id:find(":") ~= nil then id = id:gsub(":", "/") end
     end
     local data = { files = {}, public = true, description = description }
@@ -264,8 +249,8 @@ end
 function gist.delete(id, interactive)
     expect(1, id, "string")
     expect(2, interactive, "boolean", "nil")
-    if id:find("/") ~= nil or id:find(":") ~= nil then id = id:match("^([0-9A-Fa-f]+)") end
-    if id == nil or not id:match("^[0-9A-Fa-f][0-9A-Fa-f:]+[0-9A-Fa-f]$") then error("bad argument #1 to 'delete' (invalid ID)", 2) end
+    if id:find("/") ~= nil or id:find(":") ~= nil then id = id:match("^(%x+)") end
+    if id == nil or not id:match("^%x[%x:]+%x$") then error("bad argument #1 to 'delete' (invalid ID)", 2) end
     local headers = {}
     if not requestAuth(headers, interactive) then return false, "Authentication required" end
     if interactive then write("Connecting to api.github.com... ") end
