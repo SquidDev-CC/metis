@@ -1,5 +1,13 @@
-# Build directories
+# Build outputs
 /bin/illuaminate*
 /doc/**/*.html
-/.cache
+/doc/packlist
 /loader.lua
+/.cache
+
+# Config files
+/scratch
+/.vscode
+/.luacheckrc
+/usr
+/etc

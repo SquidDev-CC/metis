@@ -181,9 +181,8 @@ end
 -- @param value The value to format
 -- @treturn string The formatted value
 local function format(value)
-    -- TODO: Look into something like mbs's pretty printer.
     local pp = require "cc.pretty"
-    local ok, res = pcall(function() return pp.render(pp.pretty(value), 30) end)
+    local ok, res = pcall(function() return pp.render(pp.pretty(value), 50) end)
     if ok then return res else return tostring(value) end
 end
 

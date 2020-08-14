@@ -20,6 +20,9 @@ jobs:
         bin/mk-loader.lua loader.lua
         perl -i -pe "s/%LOADER%/$(sed -e 's/[\/&]/\\&/g' loader.lua)/g" doc/index.md
 
+    - name: Generate [acklist]
+      run: bin/mk-repo.lua doc/packlist
+
     - name: Generate documentation
       run: |
         test -d bin || mkdir bin

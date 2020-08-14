@@ -52,6 +52,4 @@ package.loaders[#package.loaders + 1] = function(name)
   local fn, err = loadfile(local_path, nil, _ENV)
   if fn then return fn, local_path else return nil, err end
 end
-
-return require
 ]])

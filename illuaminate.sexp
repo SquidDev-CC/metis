@@ -21,9 +21,16 @@
       (function-args no-space)
       (parens no-space)
       (table space)
-      (index no-space))))
+      (index no-space))
+
+    (dynamic-modules metis.math)))
+
+(at /src/
+  (lint
+    (globals
+      :max term colours keys)))
 
 (at /spec/
   (lint
     (globals
-      :max describe expect it pending stub fail sleep)))
+      :max describe expect it pending stub fail sleep keys)))
