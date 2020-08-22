@@ -23,12 +23,12 @@
       (table space)
       (index no-space))
 
-    (dynamic-modules metis.math)))
+    (dynamic-modules metis.math metis.fs)))
 
 (at /src/
   (lint
     (globals
-      :max term colours keys)))
+      :max term colours keys fs)))
 
 (at /spec/
   (lint
