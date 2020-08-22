@@ -13,12 +13,22 @@ describe("metis.crypto.sha1", function()
         local msg = h:read("*l"):match("^Msg = (%w+)$")
         local output = h:read("*l"):match("^MD = (%w+)$")
 
-        it(("len %d"):format(len), function()
+        describe(("len %d"):format(len), function()
           local input = ""
           for i = 1, #msg, 2 do input = input .. string.char(tonumber(msg:sub(i, i + 1), 16)) end
           input = input:sub(1, len / 8)
 
-          expect(sha1(input)):eq(output)
+          it("direct hash", function() expect(sha1(input)):eq(output) end)
+          it("in blocks", function()
+            local pos, s = 1, sha1.create()
+            while pos <= #input do
+              local len = math.random(0, 256)
+              s:append(input:sub(pos, pos + len))
+              pos = pos + len + 1
+            end
+
+            expect(tostring(s)):eq(output)
+          end)
         end)
       end
     end
