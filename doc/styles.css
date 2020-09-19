@@ -85,8 +85,7 @@ a[name]::before { content: "#"; }
 }
 
 #main > nav {
-    flex-basis: 30%;
-    min-width: 150px;
+    flex-basis: 20%;
     max-width: 250px;
     background-color: #f0f0f0;
 }
