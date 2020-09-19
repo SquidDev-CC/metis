@@ -16,12 +16,35 @@ end
 
 local build = os.getenv("GITHUB_RUN_NUMBER") or "0-dev"
 local version = "1.0.0." .. build
+local url = "https://raw.githubusercontent.com/SquidDev-CC/metis/dev/"
 
-if ... then io.output(...) end
 
 local function to_package(dep)
   return dep:sub(7):gsub("%.", "-")
 end
+
+local function map_concat(tbls, fn, sep)
+  local out = ""
+  for i = 1, #tbls do
+    if i > 1 then out = out .. sep end
+    out = out .. fn(tbls[i])
+  end
+  return out
+end
+
+local function packman_name(x) return "metis/" .. x end
+local function ccpt_name(x) return ("%q"):format("ccpt:metis/" .. x) end
+
+local kind, filename = ...
+if not filename then kind, filename = nil, kind end
+if not kind then kind = "packman" end
+
+if kind ~= "packman" and kind ~= "ccpt" then
+  io.stderr:write("Unknown repo kind ", kind, "\n")
+  return os.exit(1)
+end
+
+if filename and filename ~= "-" then io.output(filename) end
 
 local modules = {}
 with_command("git ls-files", function(handle)
@@ -33,9 +56,15 @@ with_command("git ls-files", function(handle)
   end
 end)
 
+if kind == "ccpt" then
+  io.write("{\n")
+end
+
 local packages = {}
 for module, file in pairs(modules) do
   local contents = string.dump(loadfile(file))
+
+  table.insert(packages, (to_package(module)))
 
   local deps = {}
   for require in contents:gmatch('(metis%.[a-z.]+)') do
@@ -46,28 +75,49 @@ for module, file in pairs(modules) do
 
     if not deps[require] then
       deps[require] = true
-      deps[#deps + 1] = "metis/" .. to_package(require)
+      deps[#deps + 1] = to_package(require)
     end
   end
 
-  table.insert(packages, "metis/" .. to_package(module))
+  if kind == "packman" then
+    io.write("name = ", to_package(module), "\n")
+    io.write("\ttype = raw\n")
+    io.write("\t\turl = ", url, file, "\n")
+    io.write("\t\tfilename = ", file:sub(5), "\n")
+    io.write("\ttarget = /usr/modules/\n")
+    io.write("\tcategory = lib\n")
+    io.write("\tversion = ", version, "\n")
+    io.write("\tdependencies = ", #deps == 0 and "none" or map_concat(deps, packman_name, " "), "\n")
+    io.write("\tsize = ", #contents, "\n")
+    io.write("end\n\n")
 
-  io.write("name = ", to_package(module), "\n")
-  io.write("\ttype = raw\n")
-  io.write("\t\turl = https://raw.githubusercontent.com/SquidDev-CC/metis/dev/", file, "\n")
-  io.write("\t\tfilename = ", file:sub(5), "\n")
-  io.write("\ttarget = /usr/modules/\n")
-  io.write("\tcategory = lib\n")
-  io.write("\tversion = ", version, "\n")
-  io.write("\tdependencies = ", #deps == 0 and "none" or table.concat(deps, " "), "\n")
-  io.write("\tsize = ", #contents, "\n")
-  io.write("end\n\n")
+  elseif kind == "ccpt" then
+    io.write('  "', to_package(module), '": {\n')
+    io.write('    "plugins": ["files"],\n')
+    io.write('    "version": "' .. version .. '",\n')
+    io.write('    "files": [\n')
+    io.write('      ["', url, file, '","/usr/modules/', file:sub(5), '"]\n')
+    io.write('    ],\n')
+    io.write('    "dependencies": [', map_concat(deps, ccpt_name, ", "), ']\n')
+    io.write('  },\n')
+  end
 end
 
-io.write("name = metis-full\n")
-io.write("\ttype = meta\n")
-io.write("\tcategory = lib\n")
-io.write("\tversion = ", version, "\n")
-io.write("\tdependencies = ", table.concat(packages, " "), "\n")
-io.write("\tsize = 0\n")
-io.write("end\n\n")
+if kind == "packman" then
+  io.write("name = metis-full\n")
+  io.write("\ttype = meta\n")
+  io.write("\tcategory = lib\n")
+  io.write("\tversion = ", version, "\n")
+  io.write("\tdependencies = ", map_concat(packages, packman_name, " "), "\n")
+  io.write("\tsize = 0\n")
+  io.write("end\n\n")
+elseif kind == "ccpt" then
+  io.write('  "metis-full": {\n')
+  io.write('    "plugins": [],\n')
+  io.write('    "version": "' .. version .. '",\n')
+  io.write('    "dependencies": [', map_concat(packages, ccpt_name, ", "), '],\n')
+  io.write('    "description":  "All packages of metis"\n')
+  io.write('  }\n')
+  io.write("}\n")
+
+end
