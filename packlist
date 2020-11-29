@@ -1,0 +1,118 @@
+name = string
+	type = raw
+		url = https://raw.githubusercontent.com/SquidDev-CC/metis/dev/src/metis/string.lua
+		filename = metis/string.lua
+	target = /usr/modules/
+	category = lib
+	version = 1.0.0.22
+	dependencies = none
+	size = 1355
+end
+
+name = crypto-sha1
+	type = raw
+		url = https://raw.githubusercontent.com/SquidDev-CC/metis/dev/src/metis/crypto/sha1.lua
+		filename = metis/crypto/sha1.lua
+	target = /usr/modules/
+	category = lib
+	version = 1.0.0.22
+	dependencies = none
+	size = 4478
+end
+
+name = async
+	type = raw
+		url = https://raw.githubusercontent.com/SquidDev-CC/metis/dev/src/metis/async.lua
+		filename = metis/async.lua
+	target = /usr/modules/
+	category = lib
+	version = 1.0.0.22
+	dependencies = none
+	size = 2799
+end
+
+name = argparse
+	type = raw
+		url = https://raw.githubusercontent.com/SquidDev-CC/metis/dev/src/metis/argparse.lua
+		filename = metis/argparse.lua
+	target = /usr/modules/
+	category = lib
+	version = 1.0.0.22
+	dependencies = none
+	size = 4267
+end
+
+name = timer
+	type = raw
+		url = https://raw.githubusercontent.com/SquidDev-CC/metis/dev/src/metis/timer.lua
+		filename = metis/timer.lua
+	target = /usr/modules/
+	category = lib
+	version = 1.0.0.22
+	dependencies = none
+	size = 802
+end
+
+name = fs
+	type = raw
+		url = https://raw.githubusercontent.com/SquidDev-CC/metis/dev/src/metis/fs.lua
+		filename = metis/fs.lua
+	target = /usr/modules/
+	category = lib
+	version = 1.0.0.22
+	dependencies = none
+	size = 1703
+end
+
+name = string-fuzzy
+	type = raw
+		url = https://raw.githubusercontent.com/SquidDev-CC/metis/dev/src/metis/string/fuzzy.lua
+		filename = metis/string/fuzzy.lua
+	target = /usr/modules/
+	category = lib
+	version = 1.0.0.22
+	dependencies = none
+	size = 1046
+end
+
+name = input-keybinding
+	type = raw
+		url = https://raw.githubusercontent.com/SquidDev-CC/metis/dev/src/metis/input/keybinding.lua
+		filename = metis/input/keybinding.lua
+	target = /usr/modules/
+	category = lib
+	version = 1.0.0.22
+	dependencies = none
+	size = 3228
+end
+
+name = input-readline
+	type = raw
+		url = https://raw.githubusercontent.com/SquidDev-CC/metis/dev/src/metis/input/readline.lua
+		filename = metis/input/readline.lua
+	target = /usr/modules/
+	category = lib
+	version = 1.0.0.22
+	dependencies = metis/math metis/input-keybinding
+	size = 10043
+end
+
+name = math
+	type = raw
+		url = https://raw.githubusercontent.com/SquidDev-CC/metis/dev/src/metis/math.lua
+		filename = metis/math.lua
+	target = /usr/modules/
+	category = lib
+	version = 1.0.0.22
+	dependencies = none
+	size = 435
+end
+
+name = metis-full
+	type = meta
+	category = lib
+	version = 1.0.0.22
+	dependencies = metis/string metis/crypto-sha1 metis/async metis/argparse metis/timer metis/fs metis/string-fuzzy metis/input-keybinding metis/input-readline metis/math
+	size = 0
+end
+

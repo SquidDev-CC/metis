@@ -1,0 +1,88 @@
+{
+  "string-fuzzy": {
+    "plugins": ["files"],
+    "version": "1.0.0.22",
+    "files": [
+      ["https://raw.githubusercontent.com/SquidDev-CC/metis/dev/src/metis/string/fuzzy.lua","/usr/modules/metis/string/fuzzy.lua"]
+    ],
+    "dependencies": []
+  },
+  "math": {
+    "plugins": ["files"],
+    "version": "1.0.0.22",
+    "files": [
+      ["https://raw.githubusercontent.com/SquidDev-CC/metis/dev/src/metis/math.lua","/usr/modules/metis/math.lua"]
+    ],
+    "dependencies": []
+  },
+  "input-readline": {
+    "plugins": ["files"],
+    "version": "1.0.0.22",
+    "files": [
+      ["https://raw.githubusercontent.com/SquidDev-CC/metis/dev/src/metis/input/readline.lua","/usr/modules/metis/input/readline.lua"]
+    ],
+    "dependencies": ["ccpt:metis/math", "ccpt:metis/input-keybinding"]
+  },
+  "argparse": {
+    "plugins": ["files"],
+    "version": "1.0.0.22",
+    "files": [
+      ["https://raw.githubusercontent.com/SquidDev-CC/metis/dev/src/metis/argparse.lua","/usr/modules/metis/argparse.lua"]
+    ],
+    "dependencies": []
+  },
+  "fs": {
+    "plugins": ["files"],
+    "version": "1.0.0.22",
+    "files": [
+      ["https://raw.githubusercontent.com/SquidDev-CC/metis/dev/src/metis/fs.lua","/usr/modules/metis/fs.lua"]
+    ],
+    "dependencies": []
+  },
+  "input-keybinding": {
+    "plugins": ["files"],
+    "version": "1.0.0.22",
+    "files": [
+      ["https://raw.githubusercontent.com/SquidDev-CC/metis/dev/src/metis/input/keybinding.lua","/usr/modules/metis/input/keybinding.lua"]
+    ],
+    "dependencies": []
+  },
+  "timer": {
+    "plugins": ["files"],
+    "version": "1.0.0.22",
+    "files": [
+      ["https://raw.githubusercontent.com/SquidDev-CC/metis/dev/src/metis/timer.lua","/usr/modules/metis/timer.lua"]
+    ],
+    "dependencies": []
+  },
+  "string": {
+    "plugins": ["files"],
+    "version": "1.0.0.22",
+    "files": [
+      ["https://raw.githubusercontent.com/SquidDev-CC/metis/dev/src/metis/string.lua","/usr/modules/metis/string.lua"]
+    ],
+    "dependencies": []
+  },
+  "async": {
+    "plugins": ["files"],
+    "version": "1.0.0.22",
+    "files": [
+      ["https://raw.githubusercontent.com/SquidDev-CC/metis/dev/src/metis/async.lua","/usr/modules/metis/async.lua"]
+    ],
+    "dependencies": []
+  },
+  "crypto-sha1": {
+    "plugins": ["files"],
+    "version": "1.0.0.22",
+    "files": [
+      ["https://raw.githubusercontent.com/SquidDev-CC/metis/dev/src/metis/crypto/sha1.lua","/usr/modules/metis/crypto/sha1.lua"]
+    ],
+    "dependencies": []
+  },
+  "metis-full": {
+    "plugins": [],
+    "version": "1.0.0.22",
+    "dependencies": ["ccpt:metis/string-fuzzy", "ccpt:metis/math", "ccpt:metis/input-readline", "ccpt:metis/argparse", "ccpt:metis/fs", "ccpt:metis/input-keybinding", "ccpt:metis/timer", "ccpt:metis/string", "ccpt:metis/async", "ccpt:metis/crypto-sha1"],
+    "description":  "All packages of metis"
+  }
+}
