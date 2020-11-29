@@ -2,6 +2,8 @@
 /bin/illuaminate*
 /doc/**/*.html
 /doc/packlist
+/doc/main.css
+/doc/main.js
 /loader.lua
 /.cache
 
