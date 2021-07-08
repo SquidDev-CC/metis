@@ -18,12 +18,12 @@ jobs:
     - name: Generate index.md
       run: |
         bin/mk-loader.lua loader.lua
-        perl -i -pe "s/%LOADER%/$(sed -e 's/[\/&]/\\&/g' loader.lua)/g" doc/index.md
+        perl -i -pe "s/%LOADER%/$(sed -e 's/[\/&]/\\&/g' loader.lua)/g" doc/usage.md
 
     - name: Generate repositories
       run: |
-        bin/mk-repo.lua packman doc/packlist
-        bin/mk-repo.lua ccpt doc/ccpt.json
+        bin/mk-repo.lua packman ./_site/packlist
+        bin/mk-repo.lua ccpt ./_site/ccpt.json
 
     - name: Generate documentation
       run: |
@@ -36,6 +36,6 @@ jobs:
       uses: peaceiris/actions-gh-pages@v3
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
-        publish_dir: ./doc
+        publish_dir: ./_site
         force_orphan: true
         commit_message: Build for

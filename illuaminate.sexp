@@ -2,15 +2,22 @@
 
 (sources
   /src/
-  /spec/)
+  /spec/
+  /doc/notes/)
 
 (doc
-  (library-path /src/)
-
-  (title "metis")
-  (source-link https://github.com/SquidDev-CC/metis/blob/${commit}/${path}#L${line})
   (index /doc/index.md)
-  (json-index false))
+  (json-index false)
+  (destination /_site/)
+
+  (site
+    (title "metis")
+    (source-link https://github.com/SquidDev-CC/metis/blob/${commit}/${path}#L${line}))
+
+  (module-kinds
+    (notes "Documentation"))
+
+  (library-path /src/))
 
 (at /
   (linters syntax:string-index)
@@ -34,3 +41,7 @@
   (lint
     (globals
       :max describe expect it pending stub fail sleep keys)))
+
+; Some gross warning ignores - illuaminate really needs comment versions of these.
+(at (/src/metis/async.lua) (linters -doc:kind-mismatch))
+(at (/doc/notes/usage.md) (linters -doc:malformed-example))

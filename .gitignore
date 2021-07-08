@@ -1,9 +1,7 @@
 # Build outputs
 /bin/illuaminate*
-/doc/**/*.html
-/doc/packlist
-/doc/main.css
-/doc/main.js
+/_site/*
+!/_site/CNAME
 /loader.lua
 /.cache
 
