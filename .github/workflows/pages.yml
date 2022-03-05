@@ -18,7 +18,7 @@ jobs:
     - name: Generate index.md
       run: |
         bin/mk-loader.lua loader.lua
-        perl -i -pe "s/%LOADER%/$(sed -e 's/[\/&]/\\&/g' loader.lua)/g" doc/usage.md
+        perl -i -pe "s/%LOADER%/$(sed -e 's/[\/&]/\\&/g' loader.lua)/g" doc/notes/usage.md
 
     - name: Generate repositories
       run: |

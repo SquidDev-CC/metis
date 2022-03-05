@@ -21,23 +21,24 @@ with_command("git ls-files", function(handle)
   for file in handle:lines() do
     if file:sub(1, 4) == "src/" and file:sub(-4) == ".lua" then
       local module = file:sub(5, -5):gsub("/", ".")
-      io.stderr:write(("Adding %q as %q\n"):format(file, module))
-      io.write(("  [%q] = %q,\n"):format(module, file))
+      local sha = with_command("git log -n 1 --pretty=format:%H -- " .. file, function(h) return h:read("*l") end)
+
+      io.stderr:write(("Adding %q as %q (last modified %s)\n"):format(file, module, sha))
+      io.write(("  [%q] = %q,\n"):format(module, sha))
     end
   end
 end)
 io.write("}\n")
 
-local sha = with_command("git rev-parse HEAD", function(h) return h:read("*l") end)
-
 io.write([[
 package.loaders[#package.loaders + 1] = function(name)
-  local path = modules[name]
-  if not path then return nil, "not a metis module" end
+  local sha = modules[name]
+  if not sha then return nil, "not a metis module" end
+  local path = name:gsub("%.", "/") .. ".lua"
 
-  local local_path = "/.cache/metis/]] .. sha .. [[/" .. path
+  local local_path = "/.cache/metis/" .. sha .. "/" .. path
   if not fs.exists(local_path) then
-    local url = "https://raw.githubusercontent.com/SquidDev-CC/metis/]] .. sha .. [[/" .. path
+    local url = "https://raw.githubusercontent.com/SquidDev-CC/metis/" .. sha .. "/src/" .. path
     local request, err = http.get(url)
     if not request then return nil, "Cannot download " .. url .. ": " .. err end
 
@@ -47,7 +48,6 @@ package.loaders[#package.loaders + 1] = function(name)
 
     request.close()
   end
-
 
   local fn, err = loadfile(local_path, nil, _ENV)
   if fn then return fn, local_path else return nil, err end
