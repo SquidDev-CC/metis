@@ -152,6 +152,8 @@ end
 local function insert_line(self, txt)
   if txt == "" then return end
 
+  clear(self)
+
   local line, pos = self.line, self.pos
   set_line(self, line:sub(1, pos) .. txt .. line:sub(pos + 1))
   self.pos = pos + #txt
