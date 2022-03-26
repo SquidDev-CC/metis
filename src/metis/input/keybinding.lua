@@ -5,7 +5,7 @@ invoke the appropriate action when a key is pressed.
 ## Keybinding syntax
 Keybindings are written in an Emacs-esque notation, specifying the modifier keys
 and then the actual key. For instance, <kbd>C-M-underscore</kbd> means the
-  "Control", "Meta" (or "Alt") and "underscore" keys must be pressed.
+"Control", "Meta" (or "Alt") and "underscore" keys must be pressed.
 
 @usage
 
@@ -23,11 +23,18 @@ while true do kb:event(os.pullEvent()) end
 local exp = require "cc.expect"
 local expect, field = exp.expect, exp.field
 
+local modifiers = {
+  [keys.leftCtrl] = true, [keys.rightCtrl] = true,
+  [keys.leftAlt] = true, [keys.rightAlt] = true,
+  [keys.leftShift] = true, [keys.rightShift] = true,
+}
+
 local function update_modifier(self)
   local down = self._down
   local modifier = 0
-  if down[keys.leftCtrl] or down[keys.rightCtrl] then modifier = modifier + 1 end
-  if down[keys.leftAlt] or down[keys.rightAlt]   then modifier = modifier + 2 end
+  if down[keys.leftCtrl] or down[keys.rightCtrl]   then modifier = modifier + 1 end
+  if down[keys.leftAlt] or down[keys.rightAlt]     then modifier = modifier + 2 end
+  if down[keys.leftShift] or down[keys.rightShift] then modifier = modifier + 4 end
   self._modifier = modifier
 end
 
@@ -44,6 +51,8 @@ local function parse_binding(str)
       modifier = bit32.bor(modifier, 1)
     elseif mod == "M" then
       modifier = bit32.bor(modifier, 2)
+    elseif mod == "S" then
+      modifier = bit32.bor(modifier, 4)
     else
       error(("Unknown modifier %q in binding %q"):format(modifier, str))
     end
@@ -62,12 +71,77 @@ local function parse_binding(str)
   return modifier, key
 end
 
+
+--- A mapping of various key combinations to functions.
+--
+-- This is used by a @{Keybindings} instance to dispatch
+--
+-- @type Keymap
+-- @see create_keymap to create a new @{Keymap}.
+local Keymap = {}
+local keymap_mt = { __name = "Keymap", __index = Keymap  }
+
+--[[- Create a new keymap.
+
+@tparam { [string] = function }|Keymap ... One or more tables of key bindings. These
+can either be:
+ - An existing @{Keymap} instance or.
+ - A mapping of keybinding names (as described in the module description) to functions.
+   The special name "char" may be used when a character is typed.
+
+Later keybindings override existing ones.
+@tparam[2] Keymap ... An existing keymap which this one will extend.
+@treturn Keymap The constructed keymap handler.
+]]
+local function create_keymap(...)
+  local bindings = { [0] = {}, {}, {}, {}, {}, {}, {}, {} }
+  local meta_chars = {}
+  local char = void
+
+  for i = 1, select('#', ...) do
+    local arg = select(i, ...)
+    expect(i, arg, "table")
+
+    if getmetatable(arg) == keymap_mt then
+      for mod, mod_bindings in pairs(arg._bindings) do
+        for key, fn in pairs(mod_bindings) do bindings[mod][key] = fn end
+      end
+      for k in pairs(arg._meta_chars) do meta_chars[k] = true end
+      if arg._on_char and arg._on_char ~= void then char = arg._on_char end
+    else
+      char = field(arg, "char", "function", "nil") or char
+
+      local local_bindings = { [0] = {}, {}, {}, {}, {}, {}, {}, {} }
+      for k in pairs(arg) do
+        if k ~= "char" then
+          if type(k) ~= "string" then error(("Bad key %s of type %s"):format(k, type(k)), 2) end
+          local action = field(arg, k, "function")
+
+          local mod, key = parse_binding(k)
+          if local_bindings[mod][key] then error(("Duplicate bindings for %s"):format(k), 2) end
+          local_bindings[mod][key] = true
+          bindings[mod][key] = action
+
+          if mod == 2 then
+            local name = keys.getName(key)
+            if name and #name == 1 then meta_chars[name] = true end
+          end
+        end
+      end
+    end
+  end
+
+  return setmetatable({ _bindings = bindings, _meta_chars = meta_chars, _on_char = char }, keymap_mt)
+end
+
+local empty_keymap = create_keymap()
+
 --- The keybinding processor. This accepts events, determines what keys are
 -- pressed, and dispatches the appropriate action.
 --
 -- @type Keybindings
 local Keybindings = {}
-local keybindings_mt = { __index = Keybindings }
+local keybindings_mt = { __name = Keybindings, __index = Keybindings }
 
 --- Process a `char` event.
 --
@@ -80,8 +154,9 @@ function Keybindings:char(chr, ...)
   -- it means that unhandled keys are "typed", but ensures that Alt Gr correctly
   -- types characters.
   local modifier = self._modifier
-  if self._on_char and (modifier == 0 or modifier == 3 or modifier == 2 and not self._meta_keys[chr]) then
-    return self._on_char(chr, ...)
+  local keymap = self._keymap
+  if bit32.band(modifier, 2) == 0 or not keymap._meta_chars[chr] then
+    return keymap._on_char(chr, ...)
   end
 end
 
@@ -91,12 +166,12 @@ end
 -- @param ... Additional arguments which will be passed to the associated action.
 -- @return The result of the associated keybinding's action, or @{nil}.
 function Keybindings:key(key, ...)
-  if key == keys.leftCtrl or key == keys.rightCtrl or key == keys.leftAlt or key == keys.rightAlt then
+  if modifiers[key] then
     self._down[key] = true
     update_modifier(self)
   end
 
-  local fn = self._bindings[self._modifier][key]
+  local fn = self._keymap._bindings[self._modifier][key]
   if fn then return fn(...) end
 end
 
@@ -104,7 +179,7 @@ end
 --
 -- @tparam number key The key which has been released.
 function Keybindings:key_up(key)
-  if key == keys.leftCtrl or key == keys.rightCtrl or key == keys.leftAlt or key == keys.rightAlt then
+  if modifiers[key] then
     self._down[key] = false
     update_modifier(self)
   end
@@ -130,6 +205,15 @@ function Keybindings:event(event, ...)
   end
 end
 
+--- Update the underlying @{Keymap} of this keybindings instance.
+--
+-- @tparam Keymap|{ [string] = function } keymap The keymap to use for this instance.
+function Keybindings:set_keymap(keymap)
+  expect(1, keymap, "table")
+  if getmetatable(keymap) ~= keymap_mt then keymap = create_keymap(keymap) end
+  self._keymap = keymap
+end
+
 --- Reset the set of pressed keys within the keybinding manager. This may be
 -- used if a window becomes unfocused, and so `key_up` events will no longer be
 -- sent to it.
@@ -140,35 +224,16 @@ end
 
 --- Create a new group of keybindings.
 --
--- @tparam { [string] = function } binds A mapping of keybinding names to
--- functions. The special name "char" may be used when a character is typed.
+-- @tparam[opt] Keymap|{ [string] = function } keymap The keymap to use for this
+-- instance. Can be changed later with @{Keybindings:set_keymap}.
 -- @treturn Keybindings The constructed keybinding handler.
-local function create(binds)
-  expect(1, binds, "table")
-  local char = field(binds, "char", "function", "nil") or void
-  local bindings = { [0] = {}, {}, {}, {} }
-
-  local meta_chars = {}
-  for k in pairs(binds) do
-    if k ~= "char" then
-      if type(k) ~= "string" then error(("Bad key %s of type %s"):format(k, type(k)), 2) end
-      local action = field(binds, k, "function")
-
-      local mod, key = parse_binding(k)
-      if bindings[mod][key] then error(("Duplicate bindings for %s"):format(k), 2) end
-      bindings[mod][key] = action
-
-      if mod == 2 then
-        local name = keys.getName(key)
-        if name and #name == 1 then meta_chars[name] = true end
-      end
-    end
+local function create(keymap)
+  expect(1, keymap, "table", "nil")
+  if keymap == nil then keymap = empty_keymap
+  elseif getmetatable(keymap) ~= keymap_mt then keymap = create_keymap(keymap)
   end
 
-  return setmetatable({
-    _down = {}, _modifier = 0, _bindings = bindings, _meta_keys = meta_chars,
-    _on_char = char,
-  }, keybindings_mt)
+  return setmetatable({ _down = {}, _modifier = 0, _keymap = keymap }, keybindings_mt)
 end
 
-return { create = create }
+return { create_keymap = create_keymap, create = create }
