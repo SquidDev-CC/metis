@@ -7,7 +7,6 @@
 
 (doc
   (index /doc/index.md)
-  (json-index false)
   (destination /_site/)
 
   (site
